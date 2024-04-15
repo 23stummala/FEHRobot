@@ -63,14 +63,15 @@ void moveStraight(float distance){
 
 void turnAboutCenter(float degrees){
     //If positive degrees, have the right motor moving forward and the left backward, and vice versa
+    float factor = 0.5;
     if(degrees > 0){
-        rightDrive.SetPercent(actualPower());
-        leftDrive.SetPercent(actualPower());
+        rightDrive.SetPercent(actualPower() * factor);
+        leftDrive.SetPercent(actualPower() * factor);
         
     }
     else{
-        leftDrive.SetPercent(-1 * actualPower());
-        rightDrive.SetPercent(-1 * actualPower());
+        leftDrive.SetPercent(-1 * actualPower()* factor);
+        rightDrive.SetPercent(-1 * actualPower()* factor);
         degrees *= -1;
     }
 
@@ -161,7 +162,7 @@ void moveWhileFrontUnbumpedPower(float power){
 }
 
 bool isBlueLight(){
-    //Sleep while the course cds Value is too dark to be a light
+    
     //Initialize a min cds value
     float min = cds.Value();
     //Go forward slightly, updating the min as necessary
@@ -337,10 +338,15 @@ void doLuggageDrop(){
 
     moveStraight(16.25);
     turn(leftDrive, leftEncoder, 45, true);
+    Sleep(0.5);
     //Move straight very quickly, ensuring the luggage will drop into the bin upon the sudden bump
     moveWhileFrontUnbumpedPower(85);
+    Sleep(1.0);
+    moveStraight(-1);
+    moveWhileFrontUnbumped();
+    Sleep(0.5);
     //Back up 
-    moveStraight(-6.0);
+    moveStraight(-5.18);
     //Turn 90 degrees to stay in position for the fuel lever
     turnAboutCenter(90);
     moveStraight(0.25);
