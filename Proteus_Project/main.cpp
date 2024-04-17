@@ -318,9 +318,6 @@ void doFuelLever(){
 }
 
 void doPassportLever(){
-    //Set appropriate min and max fo rthe passport arm servo
-    passportLever.SetMin(500);
-    passportLever.SetMax(2477);
     
     passportLever.SetDegree(180);
     Sleep(1.0);
@@ -353,6 +350,11 @@ void doLuggageDrop(){
 }
 
 void waitForLight(){
+    //Set appropriate min and max fo rthe passport arm servo
+    passportLever.SetMin(500);
+    passportLever.SetMax(2477);
+    //Set the arm to the up position
+    passportLever.SetDegree(180);
     //Wait still while the cds value is greater than 2
     while(cds.Value() > 2){
         Sleep(0.1);
