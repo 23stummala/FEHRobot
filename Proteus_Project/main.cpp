@@ -63,9 +63,11 @@ void moveStraight(float distance){
 }
 
 void turnAboutCenter(float degrees){
+    float slow = 0.5;
     //If positive degrees, have the right motor moving forward and the left backward, and vice versa
     float factor = 0.5;
     if(degrees > 0){
+<<<<<<< HEAD
         rightDrive.SetPercent(actualPower() * factor);
         leftDrive.SetPercent(actualPower() * factor);
         
@@ -73,6 +75,15 @@ void turnAboutCenter(float degrees){
     else{
         leftDrive.SetPercent(-1 * actualPower()* factor);
         rightDrive.SetPercent(-1 * actualPower()* factor);
+=======
+        rightDrive.SetPercent(actualPower() * slow);
+        leftDrive.SetPercent(actualPower() * slow);
+        
+    }
+    else{
+        leftDrive.SetPercent(-1 * actualPower() * slow);
+        rightDrive.SetPercent(-1 * actualPower() * slow);
+>>>>>>> 71476e37821075d0de374bbc8d67a34304ca889f
         degrees *= -1;
     }
 
