@@ -1,6 +1,7 @@
 #include <FEHIO.h>
 #include <FEHLCD.h>
 #include <FEHMotor.h>
+#include "LCDColors.h"
 #include "FEHUtility.h"
 #include <FEHServo.h>
 #include <FEHBattery.h>
@@ -133,12 +134,21 @@ void moveWhileFrontUnbumped(){
 
     //Continue moving forward while both bump switches are unactivated
     while(frontLeft.Value() || frontRight.Value()){
+        if(!frontLeft.Value()){
+            leftDrive.Stop();
+            rightDrive.SetPercent(actualPower() * 0.5);
+        }
+        if(!frontRight.Value()){
+            rightDrive.Stop();
+            leftDrive.SetPercent(-1 * actualPower() * 0.5);
+        }
         Sleep(0.1);
     }
 
     //Stop the motors upon proper bump and reset the encoder counts for future use
     leftDrive.Stop();
     rightDrive.Stop();
+    Sleep(0.5);
     leftEncoder.ResetCounts();
     rightEncoder.ResetCounts();
 }
@@ -190,6 +200,7 @@ bool isBlueLight(){
     Sleep(0.5);
     //If the min cds value was greater than 1.3, infer the light color was blue
     if(min > 1.3){
+        LCD.SetBackgroundColor(BLUE);
         LCD.Write("Blue: ");
         LCD.Write(min);
         Sleep(0.5);
@@ -198,6 +209,7 @@ bool isBlueLight(){
     }
     //Else, infer the light color was red
     else{
+        LCD.SetBackgroundColor(RED);
         LCD.Write("Red: ");
         LCD.Write(min);
         Sleep(0.5);
@@ -211,6 +223,7 @@ bool isBlueLight(){
 //This method should take the robot from any fuel lever to the ticketing light area
 void getUpLeftRamp(){
     moveWhileFrontUnbumped();
+    fuelLever.SetDegree(160);
     Sleep(0.5);
     moveStraight(-3.0);
     turn(leftDrive, leftEncoder, 90, true);
@@ -228,32 +241,33 @@ void hitTicketing(bool blue){
     //If the scanned light was blue, hit the blue button on the ticketing kiosk
     if(blue){
         turnAboutCenter(-45);
-        moveWhileFrontUnbumpedPower(35);
+        moveWhileFrontUnbumpedPower(50);
     }
     //Else, hit the red button on the ticketing kiosk
     else{
         //This is the additional backwards factor to travel to the red button
-        moveStraight(-5);
+        moveStraight(-6);
 
         turnAboutCenter(-45);
-        moveWhileFrontUnbumpedPower(35);
+        moveWhileFrontUnbumpedPower(50);
     }
+    Sleep(1.0);
 
-    moveStraight(-12);
+    moveStraight(-13.5);
     turnAboutCenter(-90);
     moveWhileFrontUnbumped();
-    moveStraight(-6);
+    moveStraight(-5.50);
     turnAboutCenter(90);
-    moveStraight(6);
+    moveStraight(7.2);
 
 }
 
 //This function takes the robot from the passport lever down to the final button
 void getDownRamp(){
-    moveStraight(-7);
+    moveStraight(-8.75);
     turnAboutCenter(-90);
     moveWhileFrontUnbumped();
-    moveStraight(-3);
+    moveStraight(-4.25);
     turn(leftDrive, leftEncoder, 45, true);
     moveStraight(18);
     turnAboutCenter(-45);
@@ -304,8 +318,8 @@ void doFuelLever(){
     moveStraight(inches);
 
     //Set appropriate min and max for the fuel lever servo
-    fuelLever.SetMin(500);
-    fuelLever.SetMax(2450);
+    // fuelLever.SetMin(500);
+    // fuelLever.SetMax(2450);
 
     Sleep(1.0);
     //Flip the lever down
@@ -314,7 +328,9 @@ void doFuelLever(){
     Sleep(5.0);
     //Flip the lever back up
     flipLever(false);
-    Sleep(0.5);
+    Sleep(0.75);
+    fuelLever.SetDegree(30);
+    Sleep(1.0);
 }
 
 void doPassportLever(){
@@ -328,6 +344,7 @@ void doPassportLever(){
     //Put the passport arm back down
     passportLever.SetDegree(180);
     Sleep(1.0);
+
     
 }
 
@@ -343,10 +360,9 @@ void doLuggageDrop(){
     moveWhileFrontUnbumped();
     Sleep(0.5);
     //Back up 
-    moveStraight(-5.18);
+    moveStraight(-5.0);
     //Turn 90 degrees to stay in position for the fuel lever
     turnAboutCenter(90);
-    moveStraight(0.25);
 }
 
 void waitForLight(){
@@ -360,15 +376,34 @@ void waitForLight(){
         Sleep(0.1);
     }
     //Hit the button to start the run
-    moveStraight(-3);
-    Sleep(0.1);
+    //reset the encoder counts
+    leftEncoder.ResetCounts();
+    rightEncoder.ResetCounts();
+
+    leftDrive.SetPercent(actualPower());
+    rightDrive.SetPercent(-1 * actualPower());
+
+    Sleep(1.0);
+    
+    leftDrive.Stop();
+    rightDrive.Stop();
+    // moveStraight(-3);
+    Sleep(1.0);
+
+    
 }
 
 int main(){
     LCD.Clear();
-    
     //Initialize the course to get RCS 
     RCS.InitializeTouchMenu("E3qvTBIic");
+
+    //Set fuel lever max
+    fuelLever.SetMin(500);
+    fuelLever.SetMax(2450);
+    fuelLever.SetDegree(160);
+
+
     //wait for the light
     waitForLight();
     //complete the luggage drop
